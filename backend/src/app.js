@@ -6,7 +6,7 @@ const app = express();
 
 app.use(
   cors({
-    origin: process.env.CORS_ORIGIN,
+    origin: ["http://localhost:5173"],
     credentials: true,
   })
 );
@@ -14,7 +14,6 @@ app.use(
 app.use(express.json({ limit: "15kb" }));
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
-
 //routes
 import authRouter from "./routes/authRoute.js";
 import noteRouter from "./routes/noteRoute.js";

@@ -1,17 +1,33 @@
-import React, { useState } from "react";
+import { useEffect, useState } from "react";
 import NoteCard from "../../components/NoteCard";
 import Modal from "react-modal";
 import AddEditNotes from "./AddEditNotes";
+import NavBar from "../../components/NavBar";
+import { useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 
 const Home = () => {
+  const { currentUser, errorDispatch, loading } = useSelector(
+    (state) => state.user
+  );
+  const navivage = useNavigate();
+  const [userInfo, setUserInfo] = useState(null);
+
   const [modelOpen, setModelOpen] = useState({
     isShown: false,
     type: "add",
     data: null,
   });
-
+  useEffect(() => {
+    if (currentUser === null || !currentUser) {
+      navivage("/");
+    } else {
+      setUserInfo(currentUser?.user);
+    }
+  }, []);
   return (
     <>
+      <NavBar userInfo={userInfo} />
       <div className="container mx-auto">
         <div
           className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 mt-6 
