@@ -1,17 +1,40 @@
 import { useState } from "react";
 import PasswordInput from "../../components/PasswordInput";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import axios from "axios";
 
 const SignUp = () => {
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-
+  const navigate = useNavigate();
+  const handleSignUp = async (e) => {
+    e.preventDefault();
+    try {
+      const resp = await axios.post(
+        `http://localhost:8083/api/auth/signup`,
+        {
+          username: name,
+          email,
+          password,
+        },
+        { withCredentials: true }
+      );
+      if (resp.data.success === false) {
+        console.log("error on signup");
+        setError(resp.data.message);
+        return;
+      }
+      navigate("/login");
+    } catch (error) {
+      console.log(error);
+    }
+  };
   return (
     <div className="flex items-center justify-center mt-4">
       <div className="bg-white px-7 py-5 w-96">
-        <form>
+        <form onSubmit={handleSignUp}>
           <h4 className="texr-2xl mb-6">SignUp</h4>
           <input
             type="text"

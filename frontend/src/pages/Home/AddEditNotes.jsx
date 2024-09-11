@@ -1,14 +1,65 @@
-import React, { useState } from "react";
+/* eslint-disable react/prop-types */
+import { useEffect, useState } from "react";
 import TagInput from "../../components/TagInput";
+import axios from "axios";
 
 const AddEditNotes = ({ onClose, noteData, type, getAllNotes }) => {
   const [title, setTitle] = useState(noteData?.title || "");
   const [content, setContent] = useState(noteData?.content || "");
-  const [tags, setTags] = useState(["tags1","tags2"]);
+  const [tags, setTags] = useState(noteData?.tags || []);
+  const [noteId, setNoteId] = useState(null);
 
-  const editNote = async () => {};
-  const addNewNote = async () => {};
-  const handleAddNote = async () => {
+  useEffect(() => {
+    if (noteData) {
+      setTitle(noteData.title || "");
+      setContent(noteData.content || "");
+      setTags(noteData.tags || []);
+      setNoteId(noteData._id || null);
+      // console.log("Note ID set:", noteData._id);
+    }
+  }, [noteData]);
+  const editNote = async () => {
+    // let noteId = noteData?._id;
+    if (!noteId) {
+      console.log("Note id is not available");
+      return;
+    }
+    // console.log("Note ID:", noteId);
+    try {
+      const resp = await axios.post(
+        `http://localhost:8083/api/note/edit/${noteId}`,
+        { title, tags, content },
+        { withCredentials: true }
+      );
+      if (!resp.data.success) {
+        console.log("edit", resp.data.message);
+        return;
+      }
+      getAllNotes();
+      onClose();
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  const addNewNote = async () => {
+    try {
+      const resp = await axios.post(
+        `http://localhost:8083/api/note/add`,
+        { title, tags, content },
+        { withCredentials: true }
+      );
+      if (!resp.data.success) {
+        console.log("anote", resp.data.message);
+        return;
+      }
+      getAllNotes();
+      onClose();
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  const handleAddNote = () => {
+    console.log("riunning");
     if (!title) {
       alert("please enter title");
       return;
@@ -17,7 +68,7 @@ const AddEditNotes = ({ onClose, noteData, type, getAllNotes }) => {
       alert("please enter content");
       return;
     }
-    if (tags === "edit") {
+    if (type === "edit") {
       editNote();
     } else {
       addNewNote();
@@ -61,7 +112,7 @@ const AddEditNotes = ({ onClose, noteData, type, getAllNotes }) => {
       </div>
       <div>
         <label className="text-xs text-red-300 uppercase">tags</label>
-        <TagInput tags={tags} setTags={setTags} />
+        <TagInput tags={tags || []} setTags={setTags} />
       </div>
       <div>
         <button

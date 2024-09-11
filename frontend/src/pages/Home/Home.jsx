@@ -5,26 +5,73 @@ import AddEditNotes from "./AddEditNotes";
 import NavBar from "../../components/NavBar";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
 const Home = () => {
   const { currentUser, errorDispatch, loading } = useSelector(
     (state) => state.user
   );
-  const navivage = useNavigate();
+  const navigate = useNavigate();
   const [userInfo, setUserInfo] = useState(null);
-
+  const [note, setNote] = useState([]);
   const [modelOpen, setModelOpen] = useState({
     isShown: false,
     type: "add",
     data: null,
   });
+  console.log("modelOpen", modelOpen);
   useEffect(() => {
     if (currentUser === null || !currentUser) {
-      navivage("/");
+      navigate("/login");
     } else {
       setUserInfo(currentUser?.user);
+      getAllNote();
     }
   }, []);
+  // useEffect(() => {
+  //   getAllNote();
+  // }, []);
+  const getAllNote = async () => {
+    try {
+      const resp = await axios.get(`http://localhost:8083/api/note/all`, {
+        withCredentials: true,
+      });
+      if (resp.data.statusCode === 401) {
+        navigate("/login");
+        return;
+      }
+      if (resp.data.success === false) {
+        console.log("allnotes", resp?.data);
+        return;
+      }
+      setNote(resp.data?.notes);
+    } catch (error) {
+      console.log(error);
+      if (error.response && error.response.status === 401) {
+        navigate("/login");
+      }
+    }
+  };
+  const handleEdit = (noteData) => {
+    console.log("handleedit", noteData);
+    setModelOpen({ isShown: true, data: noteData, type: "edit" });
+  };
+  const handleDelete = async (noteId) => {
+    console.log("deleteId", noteId);
+    try {
+      const resp = await axios.delete(
+        `http://localhost:8083/api/note/delete/${noteId}`,
+        { withCredentials: true }
+      );
+      if (!resp.data.success) {
+        console.log(resp.data.message);
+        return;
+      }
+      getAllNote();
+    } catch (error) {
+      console.log("delid", error);
+    }
+  };
   return (
     <>
       <NavBar userInfo={userInfo} />
@@ -34,26 +81,27 @@ const Home = () => {
        max-md:m-5 mb-3
        "
         >
-          <NoteCard
-            title={"title"}
-            date={"12-5-2024"}
-            content={"sbndjsdsndknwkdnwkndknw wkdnwkndkwdkwndknwkd"}
-            tags={"meeting aekefke"}
-            isPinned={true}
-            onEdit={() => {}}
-            onPinNote={() => {}}
-            onDelete={() => {}}
-          />
-          <NoteCard
-            title={"title"}
-            date={"12-5-2024"}
-            content={"sbndjsdsndknwkdnwkndknw wkdnwkndkwdkwndknwkd"}
-            tags={"meeting aekefke"}
-            isPinned={true}
-            onEdit={() => {}}
-            onPinNote={() => {}}
-            onDelete={() => {}}
-          />
+          {note?.length > 0
+            ? note?.map((n) => (
+                <>
+                  <NoteCard
+                    key={n?._id}
+                    title={n?.title}
+                    date={n?.createdAt}
+                    content={n?.content}
+                    tags={n?.tags || []}
+                    isPinned={n?.isPinned}
+                    onEdit={() => {
+                      handleEdit(n);
+                    }}
+                    onPinNote={() => {}}
+                    onDelete={() => {
+                      handleDelete(n?._id);
+                    }}
+                  />
+                </>
+              ))
+            : "no notes available"}
         </div>
       </div>
       <button
@@ -81,6 +129,7 @@ const Home = () => {
           }
           noteData={modelOpen.data}
           type={modelOpen.type}
+          getAllNotes={getAllNote}
         />
       </Modal>
     </>

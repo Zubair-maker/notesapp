@@ -1,6 +1,7 @@
+/* eslint-disable react/prop-types */
 import React, { useState } from "react";
 
-const TagInput = ({ tags, setTags }) => {
+const TagInput = ({ tags = [], setTags }) => {
   const [inputValue, setInputValue] = useState("");
 
   const handleRemoveTag = (index) => {
@@ -32,7 +33,7 @@ const TagInput = ({ tags, setTags }) => {
                text-slate-900 bg-slate-300 px-3 py-1 rounded-full"
             >
               # {tag}
-              <button onClick={() => handleRemoveTag(index)}>x</button>
+              <button onClick={() => handleRemoveTag(tag)}>x</button>
             </span>
           ))}
         </div>
