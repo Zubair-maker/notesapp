@@ -1,5 +1,4 @@
 /* eslint-disable react/prop-types */
-import React from "react";
 import { MdCreate, MdDelete, MdOutlinePushPin } from "react-icons/md";
 import moment from "moment";
 
@@ -24,8 +23,8 @@ const NoteCard = ({
         </div>
         <MdOutlinePushPin
           size={14}
-          className={`${isPinned ? "text-[#2B85FF]" : "text-slate-100"} 
-          text-[yellow] mb-5 cursor-pointer
+          className={`${isPinned ? "text-[#35c97f]" : "text-[#3572c9]"} 
+          mb-5 cursor-pointer
           `}
           onClick={onPinNote}
         />

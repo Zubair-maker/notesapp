@@ -25,3 +25,10 @@
     @apply text-sm text-slate-50
   }
 }
+.error-message {
+  color: #f87171; /* Tailwind's red-400 */
+  border: 1px solid #f87171; /* Tailwind's red-400 */
+  padding: 10px;
+  border-radius: 4px;
+  margin-bottom: 10px;
+}

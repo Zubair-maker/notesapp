@@ -5,6 +5,7 @@ import AddEditNotes from "./AddEditNotes";
 import NavBar from "../../components/NavBar";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 import axios from "axios";
 
 const Home = () => {
@@ -19,6 +20,7 @@ const Home = () => {
     type: "add",
     data: null,
   });
+  const [isSearch, setIsSearch] = useState(false);
   console.log("modelOpen", modelOpen);
   useEffect(() => {
     if (currentUser === null || !currentUser) {
@@ -28,6 +30,7 @@ const Home = () => {
       getAllNote();
     }
   }, []);
+  useEffect(() => {});
   // useEffect(() => {
   //   getAllNote();
   // }, []);
@@ -64,17 +67,70 @@ const Home = () => {
         { withCredentials: true }
       );
       if (!resp.data.success) {
-        console.log(resp.data.message);
+        toast.error(resp.data.message);
         return;
       }
+      toast.success(resp.data.message);
       getAllNote();
     } catch (error) {
       console.log("delid", error);
     }
   };
+  const handleClearSearch = () => {
+    setIsSearch(false);
+    getAllNote();
+  };
+  const onSearchNote = async (query) => {
+    try {
+      const resp = await axios.get(`http://localhost:8083/api/note/search/`, {
+        params: { query },
+        withCredentials: true,
+      });
+      if (!resp.data.success) {
+        toast.error(resp.data.message);
+        return;
+      }
+      setNote(resp.data.notes);
+    } catch (error) {
+      toast.error(error);
+      console.log(error);
+    }
+  };
+  const updateIsPinned = async ({ isPinned, _id }) => {
+    console.log("isp", isPinned, _id);
+
+    try {
+      const resp = await axios.put(
+        `http://localhost:8083/api/note/update-note-pinned/${_id}`,
+        { isPinned: !isPinned },
+        { withCredentials: true }
+      );
+      if (!resp.data.success) {
+        toast.error(resp.data.message);
+        return;
+      }
+      toast.success(resp.data.message);
+      getAllNote();
+    } catch (error) {
+      toast.error(error);
+      if (error.response?.status === 403) {
+        window.location.href = "/login";
+      } else {
+        // Handle other errors
+        toast.error(
+          "An error occurred: " +
+            (error.response?.data?.message || error.message)
+        );
+      }
+    }
+  };
   return (
     <>
-      <NavBar userInfo={userInfo} />
+      <NavBar
+        userInfo={userInfo}
+        onSearchNote={onSearchNote}
+        handleClearSearch={handleClearSearch}
+      />
       <div className="container mx-auto">
         <div
           className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 mt-6 
@@ -94,7 +150,9 @@ const Home = () => {
                     onEdit={() => {
                       handleEdit(n);
                     }}
-                    onPinNote={() => {}}
+                    onPinNote={() => {
+                      updateIsPinned(n);
+                    }}
                     onDelete={() => {
                       handleDelete(n?._id);
                     }}

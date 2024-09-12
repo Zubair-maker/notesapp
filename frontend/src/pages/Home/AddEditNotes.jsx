@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import TagInput from "../../components/TagInput";
 import axios from "axios";
+import { toast } from "react-toastify";
 
 const AddEditNotes = ({ onClose, noteData, type, getAllNotes }) => {
   const [title, setTitle] = useState(noteData?.title || "");
@@ -35,6 +36,7 @@ const AddEditNotes = ({ onClose, noteData, type, getAllNotes }) => {
         console.log("edit", resp.data.message);
         return;
       }
+      toast.success(resp.data.message)
       getAllNotes();
       onClose();
     } catch (error) {
@@ -52,6 +54,7 @@ const AddEditNotes = ({ onClose, noteData, type, getAllNotes }) => {
         console.log("anote", resp.data.message);
         return;
       }
+      toast.success(resp.data.message)
       getAllNotes();
       onClose();
     } catch (error) {

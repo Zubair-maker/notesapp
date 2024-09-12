@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 import { useState } from "react";
 import ProfileInfo from "./ProfileInfo";
 import SearchBar from "./SearchBar";
@@ -9,14 +10,22 @@ import {
   signOutp,
 } from "../redux/user/userSlice";
 import axios from "axios";
+import { toast } from "react-toastify";
 
-const NavBar = ({ userInfo }) => {
+const NavBar = ({ userInfo, onSearchNote, handleClearSearch }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const handleSearch = () => {};
+
+  const handleSearch = () => {
+    if (searchQuery) {
+      onSearchNote(searchQuery);
+    }
+  };
+
   const onClearSearch = () => {
     setSearchQuery("");
+    handleClearSearch();
   };
 
   const onLogout = async () => {
@@ -25,11 +34,13 @@ const NavBar = ({ userInfo }) => {
       const resp = await axios.get(`http://localhost:8083/api/auth/signout`, {
         withCredentails: true,
       });
-      if (resp.data.success === false) {
+      if (!resp.data.success) {
         dispatch(signOutFailure(resp.data.message));
-        return
+        toast.error(resp.data.message)
+        return;
       }
       dispatch(signInSuccess());
+      toast.success(resp.data.message)
       navigate("/login");
     } catch (error) {
       dispatch(signOutFailure(error));

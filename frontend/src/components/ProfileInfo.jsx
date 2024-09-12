@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 import { getNameTwoWords } from "../utils/constant";
 
 const ProfileInfo = ({ onLogout, userInfo }) => {

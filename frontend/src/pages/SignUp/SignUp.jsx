@@ -2,6 +2,12 @@ import { useState } from "react";
 import PasswordInput from "../../components/PasswordInput";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
+import {
+  validateEmail,
+  validateName,
+  validatePassword,
+} from "../../utils/constant";
+import ErrorMessage from "../../components/ErrorMessage";
 
 const SignUp = () => {
   const [email, setEmail] = useState("");
@@ -12,6 +18,14 @@ const SignUp = () => {
   const handleSignUp = async (e) => {
     e.preventDefault();
     try {
+      if (!validateEmail(email)) setError("Invalid email");
+      if (!validateName(name))
+        setName(
+          "Name between 2 and 30 characters and contain only letters and spaces"
+        );
+      if (!validatePassword(password))
+        setPassword("Password at least one letter and one number");
+
       const resp = await axios.post(
         `http://localhost:8083/api/auth/signup`,
         {
@@ -54,6 +68,7 @@ const SignUp = () => {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
+          <ErrorMessage message={error} />
           <button type="submit" className="btn-primary mt-3">
             SignUp
           </button>

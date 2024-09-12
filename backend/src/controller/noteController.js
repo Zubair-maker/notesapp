@@ -118,32 +118,48 @@ export const deleteNote = async (req, res, next) => {
 export const updateNotePinned = async (req, res, next) => {
   const { id } = req.user; // Get the ID of the authenticated user
   const { noteId } = req.params; // Get the ID of the note from request parameters
-
   try {
     // Find the note by its ID
     const note = await Note.findById(noteId);
-    console.log("noteId",noteId)
-    console.log("id",id)
+    console.log("noteId", noteId);
+    console.log("id", id);
     if (!note) {
       return next(errorHandler(404, "Note not found")); // Note not found error
     }
-
     // Check if the authenticated user is the owner of the note
     if (note.userId !== id) {
       return next(errorHandler(401, "You can only update your own note!")); // Unauthorized error
     }
-
     // Update the `isPinned` field with the value from request body
     const { isPinned } = req.body;
     note.isPinned = isPinned;
-
     // Save the updated note to the database
     await note.save();
-
     res.status(200).json({
       success: true,
       message: "Note updated successfully",
       note,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+export const searchNote = async (req, res, next) => {
+  const { query } = req.query;
+  console.log(query);
+  if (!query) {
+    return next(errorHandler(400, "Search query is required"));
+  }
+  try {
+    const matchNotes = await Note.find({
+      userId: req.user.id,
+      title: { $regex: query, $options: "i" }, // i use forcase-insensitive
+    });
+
+    res.status(200).json({
+      success: true,
+      message: "Notes found",
+      notes: matchNotes,
     });
   } catch (error) {
     next(error);

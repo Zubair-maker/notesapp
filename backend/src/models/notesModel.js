@@ -27,6 +27,9 @@ const notesSchema = new mongoose.Schema({
   },
 });
 
+// Add index for performance on frequently queried fields
+notesSchema.index({ title: "text", content: "text", userId: 1, tags: 1 });
+
 const Note = mongoose.model("Note", notesSchema);
 
 export default Note;
